@@ -1,0 +1,260 @@
+Add cart code ➖
+
+
+step-1
+ Go to main-collection.liquid and paste below code
+Find this code - <li class="grid__item main-cus-img-{{ product.id }}">
+after find paste below code
+
+<li class="grid__item main-cus-img-{{ product.id }}">
+	                            {% render 'card-product',
+	                            card_product: product,
+	                            media_aspect_ratio: section.settings.image_ratio,
+	                            show_secondary_image: section.settings.show_secondary_image,
+	                            show_vendor: section.settings.show_vendor,
+	                            show_rating: section.settings.show_rating,
+	                            lazy_load: lazy_load,
+	                            show_quick_add: section.settings.enable_quick_add,
+	                            section_id: section.id
+	                            %}
+
+<div class="main-custom-color-swatch-CP">
+	            {% for option in product.options %}
+	                            {% if option == 'Color' %}
+	                                            {% assign index = forloop.index0 %}
+	                                            {% assign colorlist = '' %}
+	                                            {% assign color = '' %}
+	                                            {% for variant in product.variants %}
+	                                                            {% capture color %}{{ variant.options[index] }}{% endcapture %}
+	                                                            {% unless colorlist contains color %}
+	                                                                            <img class="custom-color-swatch-collection cus_v-{{ variant.id }}" src="{{ variant.image.src | img_url: 'master' }}" data-src="{{ variant.image.src | img_url: 'master' }}" alt="{{ color }}" width="16" height="16" />
+	                                                                            {% capture tempList %}{{colorlist | append: color | append: ''}}{% endcapture %}
+	                                                                            {% assign colorlist = tempList %}
+	                                                            {% endunless %}
+	                                            {% endfor %}
+	                            {% endif %}
+	            {% endfor %}
+</div>
+
+</li>
+
+step - 2
+ paste below code at main-collection-product-grid.liquid at bottom
+
+	                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js&quot;></script>
+	                                   
+ 	            <script>
+	                                    {% for product in collection.products %}
+	                                                    {% for option in product.options %}
+	                                                            {% for variant in product.variants %}
+	                                                                            $(".cus_v-{{ variant.id }}").each(function() {
+	                                                                                                                            $(this).hover(function() {                         // this is the mouseenter event handler
+	                                                                                                                            $(".main-cus-img-{{ product.id }} .main-cus-img-c").attr("srcset", $(this).attr("data-src"));
+	                                                                                            },
+ 	                  $(".main-cus-img-{{ product.id }} .main-cus-img-c").attr("srcset", "{{ product.media[0] | img_url: 'master' }}");                         // this will revert it back to the original image (tv.jpg)
+	                                                                                            });
+	                                                                            });
+	                                                                    {% endfor %}
+	                                                    {% endfor %}
+	                                    {% endfor %}
+</script>
+
+
+
+
+
+step - 3
+Add this CSS at main-collection-product-grid.liquid at bottom
+<style>
+	            img.custom-color-swatch-collection {
+	                            width: 30px;
+	                            height: 32px;
+	                            margin: 0 5px;
+}
+</style>
+
+step - 4
+Find this code <div class="card-wrapper product-card-wrapper underline-links-hover">
+	    Add this class (custom-card__content) to this code{<div class="custom-card__content card-wrapper product-card-wrapper underline-links-hover">}
+	   
+ Add this CSS at base.css at bottom
+/* collection page color swatch         */
+.custom-card__content {
+	                            height: 92% !important;
+}
+
+stem-5
+  find this css ( class="motion-reduce" ) first no. vali
+add this css ( main-cus-img-c )
+
+
+
+	          ///////////////onclick functionality in collection products
+
+step-1
+inside card-product.liquid
+find class="card__information" inside it <a class="full-unstyled-link">   go to 2nd card_information div
+  add this attribute in a tag
+	                 
+ 	                  <a
+ 	                      class="motion-reduce main-cus-img-c full-unstyled-link"
+	                        vid=""
+	                        >
+
+
+step -2
+
+inside main-collection-product-grid.liquid
+Find this code - <li class="grid__item main-cus-img-{{ product.id }}">
+add this code
+
+<div class="main-custom-color-swatch-CP">
+	                                    {% for option in product.options %}
+	                                        {% if option == 'Color' %}
+	                                            {% assign index = forloop.index0 %}
+	                                            {% assign colorlist = '' %}
+	                                            {% assign color = '' %}
+	                                            {% for variant in product.variants %}
+	                                                {% capture color %}{{ variant.options[index] }}{% endcapture %}
+	                                                {% unless colorlist contains color %}
+	                                                    <img
+	                                                        class="custom-color-swatch-collection cus_v-{{ variant.id }}"
+	                                                        src="{{ variant.image.src | img_url: 'master' }}"
+	                                                        data-src="{{ variant.image.src | img_url: 'master' }}"
+	                                                        alt="{{ color }}"
+	                                                        width="16"
+	                                                        height="16"
+	                                                        varianturl="{{ product.url }}?variant="
+	                                                        variantID="{{ variant.id }}"
+	                                                    >
+	                                                    {% capture tempList %}{{colorlist | append: color | append: ''}}{% endcapture %}
+	                                                    {% assign colorlist = tempList %}
+	                                                {% endunless %}
+	                                            {% endfor %}
+	                                            <script type="application/json">
+	                                                {{ product.variants | json }}
+	                                            </script>
+	                                        {% endif %}
+	                                    {% endfor %}
+	                                </div>
+
+
+
+step 3
+paste below code at main-collection-product-grid.liquid at bottom
+
+<script>
+	{% for product in collection.products %}
+	    {% for option in product.options %}
+	      {% for variant in product.variants %}
+	            $(".cus_v-{{ variant.id }}").each(function() {
+	            $(this).on("click", function() {
+	                            var dataSrc = $(this).attr("data-src");
+	                            var varid= $(this).attr("variantID");
+	                            var varianturl= $(this).attr("varianturl");
+	                            var newurl=varianturl+varid
+	                            $(".main-cus-img-{{ product.id }} .main-cus-img-c").attr("srcset", dataSrc);
+	                            $(".main-cus-img-{{ product.id }} .main-cus-img-c").attr("vid",varid);
+	                            $(".main-cus-img-{{ product.id }} .main-cus-img-c").attr("href",newurl);
+	            });
+});
+	                                {% endfor %}
+	                {% endfor %}
+	{% endfor %}
+</script>
+
+
+
+Cart button add collection page -
+
+       <div style="position: relative; top:-10rem; z-index: 1;top: -6rem;">
+                    <form method="post" action="/cart/add">
+                      <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+
+                      <input
+                        min="1"
+                        type="number"
+                        id="quantity"
+                        name="quantity"
+                        value="1"
+                        style="
+                          width: 100%;
+                          padding: 10px;
+                          margin-bottom: 10px;
+                        "
+                      >
+
+                      <input
+                        type="submit"
+                        value="Add to cart"
+                        class="btn your-button-selector"
+                        style="
+                          width: 100%;
+                          padding: 10px;
+                          background-color: #000;
+                          color: #fff;
+                          font-size: 15px;
+                          border: 0;
+                        "
+                      >
+                    </form>
+                  </div>
+ 
+https://shopidevs.com/how-to-add-variant-selector-in-shopify-on-collection-pages/
+
+
+
+{% if request.page_type == 'collection' %}
+  {% if product.variants.size > 1 %}
+    <div class="product-variant-dropdown">
+      <form action="/cart/add" method="post" id="add-to-cart-form">
+        <select name="id" class="product-variant-select">
+          {% for variant in product.variants %}
+            {% if variant.available %}
+              <option value="{{ variant.id }}">{{ variant.title }}</option>
+            {% else %}
+              <option disabled="disabled">{{ variant.title }} - Sold Out</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <input type="submit" value="Add to cart" class="product-variant-submit-button">
+      </form>
+    </div>
+
+    <script>
+      document.getElementById('add-to-cart-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        var formData = new FormData(this);
+
+        // Use Ajax to submit the form data without refreshing the page
+        fetch('/cart/add', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+
+          // Check the content type of the response
+          var contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            return response.json(); // Parse JSON if content-type is JSON
+          } else {
+            return response.text(); // Return raw text if content-type is not JSON
+          }
+        })
+        .then(data => {
+          // Handle the response, e.g., update the cart count or show a success message
+          console.log('Product added to cart:', data);
+        })
+        .catch(error => {
+          console.error('Error adding product to cart:', error);
+        });
+      });
+    </script>
+  {% endif %}
+{% endif %}
+
+
